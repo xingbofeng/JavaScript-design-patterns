@@ -34,7 +34,7 @@
 ##### C++
 ```C++
 int anInteger;
-char aString;
+char* aString;
 ```
 ##### Python
 Python其实是强类型语言。
@@ -53,4 +53,122 @@ var a;
 let b;
 const c;
 console.log("2" - "1"); // 1
+```
+
+#### 动态语言和静态语言
+　　通常我们所说的动态语言、静态语言是指动态类型语言和静态类型语言。
+
+##### 动态类型语言
+动态类型语言是指在运行期间才去做数据类型检查的语言，也就是说，在用动态类型的语言编程时，永远也不用给任何变量指定数据类型，该语言会在你第一次赋值给变量时，在内部将数据类型记录下来。`Python`就是一种典型的动态类型语言。
+
+##### 静态类型语言
+静态类型语言与动态类型语言刚好相反，它的数据类型是在编译其间检查的，也就是说在写程序时要声明所有变量的数据类型，C/C++是静态类型语言的典型代表，其他的静态类型语言还有Java等。
+
+### 鸭子类型
+#### 背景
+![](./pictures/3.png)
+
+```javascript
+var duck = {
+  sing: function() {
+    console.log('嘎嘎嘎');
+  }
+};
+
+var chicken = {
+  sing: function() {
+    console.log('嘎嘎嘎');
+  }
+}
+```
+
+举个例子：如果一个对象有`push`和`pop`方法，并且这些方法提供了正确的实现，它就可以当作栈来使用。如果一个对象有`length`属性，也可以按照下标来存取属性（如果有`slice`和`splice`方法则更好了），这个对象可以当作数组使用。
+
+在动态类型语言中是很容易实现的，而在静态语言类型中，往往要通过抽象类或者接口等将对象向上转型。当对象真正类型被隐藏在它的超类型之后，这些对象才能在类型检查系统的“监视”之下相互替换使用。只有当对象能够被相互替换使用，才能体现出对象多态性的价值。
+
+## 1.2 多态
+实际含义：同一操作作用于不同的对象上边，可以产生不同的解释和不同的执行结果。
+```javascript
+var makeSound = function( animal ){
+    if ( animal instanceof Duck ){
+        console.log( '嘎嘎嘎' );
+    }else if ( animal instanceof Chicken ){
+        console.log( '咯咯咯' );
+    }
+};
+var Duck = function(){};
+var Chicken = function(){};
+makeSound( new Duck() );        //嘎嘎嘎
+makeSound( new Chicken() );    //咯咯咯
+```
+
+这样的“多态性”是无法令人满意的，如果后来又增加了一只动物，比如狗，显然狗的叫声是“汪汪汪”，此时我们必须得改动makeSound函数，才能让狗也发出叫声。修改代码总是危险的，修改的地方越多，程序出错的可能性就越大，而且当动物的种类越来越多时，makeSound有可能变成一个巨大的函数。
+
+多态的思想是把“做什么”和“谁去做以及怎么样去做”分离开，也就是将“不变的事物”和“可能改变的事物”分离开。
+
+```javascript
+// makeSound是不变的
+var makeSound = function( animal ){
+    animal.sound();
+};
+// 把可变的部分各自封装起来，我们刚才谈到的多态性实际上指的是对象的多态性
+var Duck = function(){}  
+Duck.prototype.sound = function(){
+  console.log( '嘎嘎嘎' );
+};
+var Chicken = function(){}
+Chicken.prototype.sound = function(){
+  console.log( '咯咯咯' );
+};
+makeSound( new Duck() );        //嘎嘎嘎
+makeSound( new Chicken() );    //咯咯咯
+```
+
+现在我们向鸭和鸡都发出“叫唤”的消息，它们接到消息后分别作出了不同的反应。如果有一天动物世界里又增加了一只狗，这时候只要简单地追加一些代码就可以了，而不用改动以前的makeSound函数，也就是累积很多的if else语句，如下所示：
+
+```javascript
+var Dog = function(){}
+Dog.prototype.sound = function(){
+  console.log( '汪汪汪' );
+};
+makeSound( new Dog() );     //汪汪汪
+```
+
+对于静态类型语言：
+```java
+public class AnimalSound {
+  public void makeSound( Duck duck ) {
+    duck.makeSound();
+  }
+}
+
+public class Test {
+  public static void main( String args[] ) {
+    AnimalSound animalSound = new AnimalSound();
+    Chicken chicken = new Chicken();
+    animalSound.makeSound( chicken ); // 报错，只接受Duck类型参数
+  }
+}
+```
+
+某些时候，在享受静态语言类型检查带来的安全性的同时，我们亦会感觉被束缚了手脚。
+
+使用继承得到多态效果，是让对象表现出多态性的常用手段。
+```java
+public abstract class Animal {
+  abstract void makeSound();
+}
+
+public class Chicken extends Animal {
+  public void makeSound() {
+    System.out.println( "咯咯咯" )
+  }
+}
+
+public class Duck extends Animal {
+  public void makeSound() {
+    System.out.println( "嘎嘎嘎" )
+  }
+}
+
 ```
