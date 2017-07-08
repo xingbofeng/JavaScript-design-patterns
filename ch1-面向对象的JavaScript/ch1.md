@@ -135,6 +135,7 @@ makeSound( new Dog() );     //汪汪汪
 ```
 
 对于静态类型语言：
+
 ```java
 public class AnimalSound {
   public void makeSound( Duck duck ) {
@@ -154,6 +155,7 @@ public class Test {
 某些时候，在享受静态语言类型检查带来的安全性的同时，我们亦会感觉被束缚了手脚。
 
 使用继承得到多态效果，是让对象表现出多态性的常用手段。
+
 ```java
 public abstract class Animal {
   abstract void makeSound();
@@ -172,3 +174,110 @@ public class Duck extends Animal {
 }
 
 ```
+
+## 1.3封装
+### 封装数据
+`JavaScript`没有像大多数面向对象语言提供的`public`、`protected`、`private`关键字来控制访问权限。我们只能依赖变量的作用域来实现封装特性，而且只能模拟出`public`和`private`两种封装性。
+
+除了`ES6`提供的`let`之外，我们通过自执行匿名函数来创建作用域：
+
+```javascript
+var myObject = (function() {
+  var __name = 'counterxing';
+  return {
+    getName: function() {
+      return __name;
+    }
+  }
+})();
+
+console.log(myObject.getName()); // 输出counterxing
+console.log(myObject.__name); // 输出undefined
+```
+
+### 封装实现
+封装的目的是将信息隐藏，封装应该被视为“任何形式的封装”，也就是说，封装不仅仅是隐藏数据，还包括隐藏实现细节、设计细节以及隐藏对象的类型等。
+
+封装实现细节使得对象内部的变化对于其它对象来说是透明的，也就是不可见的。对象对它的行为负责，其它对象和用户都不关心它的内部实现。封装使得对象之间的耦合变松散。对象之间只通过暴露`API接口`来通信。当我们修改一个对象时，可以随意修改它的内部实现，只要对外接口没有变化就不会影响到程序的其它功能。
+
+### 封装类型
+`JavaScript`类型模糊的语言，在封装类型方面，`JavaScript`没有能力也没必要做得更多。但对于`JavaScript设计模式`来说，不区分类型是一种失色，也可以说是一种方便。
+
+### 封装变化
+把系统中稳定不变的部分和容易变化的部分隔离开，在系统演变的过程中，我们只需要替换容易变化的部分，如果这些部分是已经封装好的，替换起来也相对容易。
+
+## 1.4原型模式
+[Object.create()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/create)
+
+```javascript
+var Plane = function() {
+  this.blood = 100;
+  this.attackLevel = 1;
+  this.defenseLevel = 1;
+}
+
+var plane = new Plane();
+plane.blood = 500;
+plane.attackLevel = 10;
+plane.defenseLevel = 7;
+
+var clonePlane = Object.create(plane); // plane的属性在其__proto__上
+console.log(clonePlane.blood); // 500
+console.log(clonePlane.attackLevel); // 10
+console.log(clonePlane.defenseLevel); // 7
+```
+
+```javascript
+var Plane = function() {
+  this.blood = 100;
+  this.attackLevel = 1;
+  this.defenseLevel = 1;
+}
+
+var plane = new Plane();
+plane.blood = 500;
+plane.attackLevel = 10;
+plane.defenseLevel = 7;
+
+var clonePlaneClass = new Function();
+clonePlaneClass.prototype = new Plane();
+clonePlaneClass.prototype.constructor = clonePlaneClass; // 要把constructor指向自身
+var clonePlane = new clonePlaneClass();
+console.log(clonePlane.blood); // 500
+console.log(clonePlane.attackLevel); // 10
+console.log(clonePlane.defenseLevel); // 7
+```
+
+* 当对象无法响应某个请求时，会把该请求委托给自己的原型。（原型链）
+* 绝大多数的数据都是对象。
+* 要得到一个对象，不是通过实例化类，而是找到一个对象作为原型并克隆它。
+
+### 绝大多数的数据都是对象
+`JavaScript`中，其根对象是`Object.prototype`，在`JavaScript`创建的每个对象，实际上都是从`Object.prototype`对象克隆而来。`Object.prototype`对象就是它们的原型。
+
+[Object.getPrototypeOf()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/GetPrototypeOf) 方法返回指定对象的原型
+
+
+```javascript
+var obj1 = new Object();
+var obj2 = {};
+console.log(Object.getPrototypeOf(obj1) === Object.prototype);
+console.log(Object.getPrototypeOf(obj2) === Object.prototype);
+```
+
+### 要得到一个对象，不是通过实例化类，而是找到一个对象作为原型并克隆它
+在`JavaScript`中，我们不需要关心克隆的细节，因为这是引擎内部负责实现的。我们所需要做的只是显示调用`var obj1 = new Object()`或者`var obj2 = {}`。此时，引擎内部会从`Object.prototype`上面克隆一个对象出来，我们最终得到的就是这个对象。
+
+`JavaScript`函数既可以作为普通函数调用，也可以作为构造器被调用。当使用`new`运算符调用函数时，此时的函数就是一个构造器。用`new`来创建对象的过程，实际上也是先克隆`Object.prototype`对象。
+
+### 对象会记住它的原型
+`__proto__`指向对象构造器的原型。
+
+```javascript
+var a = new Object();
+console.log(a.__proto__ === Object.prototype); // true
+```
+
+`__proto__`只会在某些浏览器中暴露。
+
+### 如果对象无法相应某个请求，它会把这个请求委托给它的构造器的原型

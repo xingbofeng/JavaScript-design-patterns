@@ -1037,7 +1037,7 @@ body .markdown-body
 <p>这个想必大家都清楚，例如<code>C/C++</code>是强类型的，一旦一个变量被指定了某个数据类型，如果不经过强制转换，那么它就永远是这个数据类型了。</p>
 <h5 id="c"><a name="user-content-c" href="#c" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>C++</h5>
 <pre><code class="C++">int anInteger;
-char aString;
+char* aString;
 </code></pre>
 
 <h5 id="python"><a name="user-content-python" href="#python" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>Python</h5>
@@ -1054,4 +1054,193 @@ TypeError: unsupported operand type(s) for -: 'str' and 'str'
 let b;
 const c;
 console.log(&quot;2&quot; - &quot;1&quot;); // 1
-</code></pre></p></article></body></html>
+</code></pre></p>
+<h4 id="_6"><a name="user-content-_6" href="#_6" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>动态语言和静态语言</h4>
+<p>通常我们所说的动态语言、静态语言是指动态类型语言和静态类型语言。</p>
+<h5 id="_7"><a name="user-content-_7" href="#_7" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>动态类型语言</h5>
+<p>动态类型语言是指在运行期间才去做数据类型检查的语言，也就是说，在用动态类型的语言编程时，永远也不用给任何变量指定数据类型，该语言会在你第一次赋值给变量时，在内部将数据类型记录下来。<code>Python</code>就是一种典型的动态类型语言。</p>
+<h5 id="_8"><a name="user-content-_8" href="#_8" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>静态类型语言</h5>
+<p>静态类型语言与动态类型语言刚好相反，它的数据类型是在编译其间检查的，也就是说在写程序时要声明所有变量的数据类型，C/C++是静态类型语言的典型代表，其他的静态类型语言还有Java等。</p>
+<h3 id="_9"><a name="user-content-_9" href="#_9" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>鸭子类型</h3>
+<h4 id="_10"><a name="user-content-_10" href="#_10" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>背景</h4>
+<p><img alt="" src="///C://Users/Administrator/Desktop/JavaScript-design-patterns/ch1-%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%9A%84JavaScript/pictures/3.png" /></p>
+<pre><code class="javascript">var duck = {
+  sing: function() {
+    console.log('嘎嘎嘎');
+  }
+};
+
+var chicken = {
+  sing: function() {
+    console.log('嘎嘎嘎');
+  }
+}
+</code></pre>
+
+<p>举个例子：如果一个对象有<code>push</code>和<code>pop</code>方法，并且这些方法提供了正确的实现，它就可以当作栈来使用。如果一个对象有<code>length</code>属性，也可以按照下标来存取属性（如果有<code>slice</code>和<code>splice</code>方法则更好了），这个对象可以当作数组使用。</p>
+<p>在动态类型语言中是很容易实现的，而在静态语言类型中，往往要通过抽象类或者接口等将对象向上转型。当对象真正类型被隐藏在它的超类型之后，这些对象才能在类型检查系统的“监视”之下相互替换使用。只有当对象能够被相互替换使用，才能体现出对象多态性的价值。</p>
+<h2 id="12"><a name="user-content-12" href="#12" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>1.2 多态</h2>
+<p>实际含义：同一操作作用于不同的对象上边，可以产生不同的解释和不同的执行结果。<br />
+<pre><code class="javascript">var makeSound = function( animal ){
+    if ( animal instanceof Duck ){
+        console.log( '嘎嘎嘎' );
+    }else if ( animal instanceof Chicken ){
+        console.log( '咯咯咯' );
+    }
+};
+var Duck = function(){};
+var Chicken = function(){};
+makeSound( new Duck() );        //嘎嘎嘎
+makeSound( new Chicken() );    //咯咯咯
+</code></pre></p>
+<p>这样的“多态性”是无法令人满意的，如果后来又增加了一只动物，比如狗，显然狗的叫声是“汪汪汪”，此时我们必须得改动makeSound函数，才能让狗也发出叫声。修改代码总是危险的，修改的地方越多，程序出错的可能性就越大，而且当动物的种类越来越多时，makeSound有可能变成一个巨大的函数。</p>
+<p>多态的思想是把“做什么”和“谁去做以及怎么样去做”分离开，也就是将“不变的事物”和“可能改变的事物”分离开。</p>
+<pre><code class="javascript">// makeSound是不变的
+var makeSound = function( animal ){
+    animal.sound();
+};
+// 把可变的部分各自封装起来，我们刚才谈到的多态性实际上指的是对象的多态性
+var Duck = function(){}  
+Duck.prototype.sound = function(){
+  console.log( '嘎嘎嘎' );
+};
+var Chicken = function(){}
+Chicken.prototype.sound = function(){
+  console.log( '咯咯咯' );
+};
+makeSound( new Duck() );        //嘎嘎嘎
+makeSound( new Chicken() );    //咯咯咯
+</code></pre>
+
+<p>现在我们向鸭和鸡都发出“叫唤”的消息，它们接到消息后分别作出了不同的反应。如果有一天动物世界里又增加了一只狗，这时候只要简单地追加一些代码就可以了，而不用改动以前的makeSound函数，也就是累积很多的if else语句，如下所示：</p>
+<pre><code class="javascript">var Dog = function(){}
+Dog.prototype.sound = function(){
+  console.log( '汪汪汪' );
+};
+makeSound( new Dog() );     //汪汪汪
+</code></pre>
+
+<p>对于静态类型语言：</p>
+<pre><code class="java">public class AnimalSound {
+  public void makeSound( Duck duck ) {
+    duck.makeSound();
+  }
+}
+
+public class Test {
+  public static void main( String args[] ) {
+    AnimalSound animalSound = new AnimalSound();
+    Chicken chicken = new Chicken();
+    animalSound.makeSound( chicken ); // 报错，只接受Duck类型参数
+  }
+}
+</code></pre>
+
+<p>某些时候，在享受静态语言类型检查带来的安全性的同时，我们亦会感觉被束缚了手脚。</p>
+<p>使用继承得到多态效果，是让对象表现出多态性的常用手段。</p>
+<pre><code class="java">public abstract class Animal {
+  abstract void makeSound();
+}
+
+public class Chicken extends Animal {
+  public void makeSound() {
+    System.out.println( &quot;咯咯咯&quot; )
+  }
+}
+
+public class Duck extends Animal {
+  public void makeSound() {
+    System.out.println( &quot;嘎嘎嘎&quot; )
+  }
+}
+
+</code></pre>
+
+<h2 id="13"><a name="user-content-13" href="#13" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>1.3封装</h2>
+<h3 id="_11"><a name="user-content-_11" href="#_11" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>封装数据</h3>
+<p><code>JavaScript</code>没有像大多数面向对象语言提供的<code>public</code>、<code>protected</code>、<code>private</code>关键字来控制访问权限。我们只能依赖变量的作用域来实现封装特性，而且只能模拟出<code>public</code>和<code>private</code>两种封装性。</p>
+<p>除了<code>ES6</code>提供的<code>let</code>之外，我们通过自执行匿名函数来创建作用域：</p>
+<pre><code class="javascript">var myObject = (function() {
+  var __name = 'counterxing';
+  return {
+    getName: function() {
+      return __name;
+    }
+  }
+})();
+
+console.log(myObject.getName()); // 输出counterxing
+console.log(myObject.__name); // 输出undefined
+</code></pre>
+
+<h3 id="_12"><a name="user-content-_12" href="#_12" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>封装实现</h3>
+<p>封装的目的是将信息隐藏，封装应该被视为“任何形式的封装”，也就是说，封装不仅仅是隐藏数据，还包括隐藏实现细节、设计细节以及隐藏对象的类型等。</p>
+<p>封装实现细节使得对象内部的变化对于其它对象来说是透明的，也就是不可见的。对象对它的行为负责，其它对象和用户都不关心它的内部实现。封装使得对象之间的耦合变松散。对象之间只通过暴露<code>API接口</code>来通信。当我们修改一个对象时，可以随意修改它的内部实现，只要对外接口没有变化就不会影响到程序的其它功能。</p>
+<h3 id="_13"><a name="user-content-_13" href="#_13" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>封装类型</h3>
+<p><code>JavaScript</code>类型模糊的语言，在封装类型方面，<code>JavaScript</code>没有能力也没必要做得更多。但对于<code>JavaScript设计模式</code>来说，不区分类型是一种失色，也可以说是一种方便。</p>
+<h3 id="_14"><a name="user-content-_14" href="#_14" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>封装变化</h3>
+<p>把系统中稳定不变的部分和容易变化的部分隔离开，在系统演变的过程中，我们只需要替换容易变化的部分，如果这些部分是已经封装好的，替换起来也相对容易。</p>
+<h2 id="14"><a name="user-content-14" href="#14" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>1.4原型模式</h2>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/create">Object.create()</a></p>
+<pre><code class="javascript">var Plane = function() {
+  this.blood = 100;
+  this.attackLevel = 1;
+  this.defenseLevel = 1;
+}
+
+var plane = new Plane();
+plane.blood = 500;
+plane.attackLevel = 10;
+plane.defenseLevel = 7;
+
+var clonePlane = Object.create(plane); // plane的属性在其__proto__上
+console.log(clonePlane.blood); // 500
+console.log(clonePlane.attackLevel); // 10
+console.log(clonePlane.defenseLevel); // 7
+</code></pre>
+
+<pre><code class="javascript">var Plane = function() {
+  this.blood = 100;
+  this.attackLevel = 1;
+  this.defenseLevel = 1;
+}
+
+var plane = new Plane();
+plane.blood = 500;
+plane.attackLevel = 10;
+plane.defenseLevel = 7;
+
+var clonePlaneClass = new Function();
+clonePlaneClass.prototype = new Plane();
+clonePlaneClass.prototype.constructor = clonePlaneClass; // 要把constructor指向自身
+var clonePlane = new clonePlaneClass();
+console.log(clonePlane.blood); // 500
+console.log(clonePlane.attackLevel); // 10
+console.log(clonePlane.defenseLevel); // 7
+</code></pre>
+
+<ul>
+<li>当对象无法响应某个请求时，会把该请求委托给自己的原型。（原型链）</li>
+<li>绝大多数的数据都是对象。</li>
+<li>要得到一个对象，不是通过实例化类，而是找到一个对象作为原型并克隆它。</li>
+</ul>
+<h3 id="_15"><a name="user-content-_15" href="#_15" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>绝大多数的数据都是对象</h3>
+<p><code>JavaScript</code>中，其根对象是<code>Object.prototype</code>，在<code>JavaScript</code>创建的每个对象，实际上都是从<code>Object.prototype</code>对象克隆而来。<code>Object.prototype</code>对象就是它们的原型。</p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/GetPrototypeOf">Object.getPrototypeOf()</a> 方法返回指定对象的原型</p>
+<pre><code class="javascript">var obj1 = new Object();
+var obj2 = {};
+console.log(Object.getPrototypeOf(obj1) === Object.prototype);
+console.log(Object.getPrototypeOf(obj2) === Object.prototype);
+</code></pre>
+
+<h3 id="_16"><a name="user-content-_16" href="#_16" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>要得到一个对象，不是通过实例化类，而是找到一个对象作为原型并克隆它</h3>
+<p>在<code>JavaScript</code>中，我们不需要关心克隆的细节，因为这是引擎内部负责实现的。我们所需要做的只是显示调用<code>var obj1 = new Object()</code>或者<code>var obj2 = {}</code>。此时，引擎内部会从<code>Object.prototype</code>上面克隆一个对象出来，我们最终得到的就是这个对象。</p>
+<p><code>JavaScript</code>函数既可以作为普通函数调用，也可以作为构造器被调用。当使用<code>new</code>运算符调用函数时，此时的函数就是一个构造器。用<code>new</code>来创建对象的过程，实际上也是先克隆<code>Object.prototype</code>对象。</p>
+<h3 id="_17"><a name="user-content-_17" href="#_17" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>对象会记住它的原型</h3>
+<p><code>__proto__</code>指向对象构造器的原型。</p>
+<pre><code class="javascript">var a = new Object();
+console.log(a.__proto__ === Object.prototype); // true
+</code></pre>
+
+<p><code>__proto__</code>只会在某些浏览器中暴露。</p>
+<h3 id="_18"><a name="user-content-_18" href="#_18" class="headeranchor-link" aria-hidden="true"><span class="headeranchor"></span></a>如果对象无法相应某个请求，它会把这个请求委托给它的构造器的原型</h3></article></body></html>
