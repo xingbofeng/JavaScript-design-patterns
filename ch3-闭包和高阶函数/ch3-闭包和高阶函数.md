@@ -312,6 +312,7 @@ _.throttle = function(func, wait, options) {
   return function() {
     var now = _.now();
     // 首次执行时，如果设定了开始边界不执行选项，将上次执行时间设定为当前时间。
+    // 否则previous这里是0，如果是0，remaining肯定小于0，则会执行func.apply(context, args);这条语句，执行业务逻辑
     if (!previous && options.leading === false) previous = now;
     // 延迟执行时间间隔
     var remaining = wait - (now - previous);
@@ -320,13 +321,18 @@ _.throttle = function(func, wait, options) {
     // 延迟时间间隔remaining小于等于0，表示上次执行至此所间隔时间已经超过一个时间窗口
     // remaining大于时间窗口wait，表示客户端系统时间被调整过
     if (remaining <= 0 || remaining > wait) {
+      // 清除定时器防止内存泄露
+      // clearTimeout(timeout)后，timeout的值并不会清空，如果不设置为null，就不能根据timeout设置下次的timeout
       clearTimeout(timeout);
       timeout = null;
+      // 把previous置为现在的时间戳(下次判断用)
       previous = now;
+      // 调用func
       result = func.apply(context, args);
       if (!timeout) context = args = null;
       //如果延迟执行不存在，且没有设定结尾边界不执行选项
     } else if (!timeout && options.trailing !== false) {
+      // 设定把timeout定时器，设定为remaining毫秒后推入定时器回调队列执行later回调函数
       timeout = setTimeout(later, remaining);
     }
     return result;
@@ -351,12 +357,14 @@ _.debounce = function(func, wait, immediate) {
     var last = _.now() - timestamp;
 
     // 上次被包装函数被调用时间间隔last小于设定时间间隔wait
+    // 重新设定定时器，不过时间更新了！
     if (last < wait && last > 0) {
       timeout = setTimeout(later, wait - last);
     } else {
       timeout = null;
       // 如果设定为immediate===true，因为开始边界已经调用过了此处无需调用
       if (!immediate) {
+        // 执行业务逻辑
         result = func.apply(context, args);
         if (!timeout) context = args = null;
       }
@@ -367,10 +375,13 @@ _.debounce = function(func, wait, immediate) {
     context = this;
     args = arguments;
     timestamp = _.now();
+    // 立即触发需要满足两个条件：immediate为true，且timeout不是null
+    // 根据 timeout 是否为空可以判断是否是首次触发
     var callNow = immediate && !timeout;
     // 如果延时不存在，重新设定延时
     if (!timeout) timeout = setTimeout(later, wait);
     if (callNow) {
+      // 达到立即触发的条件（第一次调用），调用业务逻辑函数
       result = func.apply(context, args);
       context = args = null;
     }
@@ -379,3 +390,5 @@ _.debounce = function(func, wait, immediate) {
   };
 };
 ```
+### 分时函数
+### 惰性加载
