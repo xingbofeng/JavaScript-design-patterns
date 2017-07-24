@@ -205,7 +205,6 @@ event.remove = function(key, fn) {
       var _fn = fns[l];
       if (_fn === fn) {
         fns.splice(l, 1);
-        var salesOffices = {};
         // 删除订阅者的回调函数
       }
     }
@@ -213,6 +212,7 @@ event.remove = function(key, fn) {
 };
 
 // 动态安装发布—订阅功能
+var salesOffices = {};
 var installEvent = function(obj) {
   for (var i in event) {
     obj[i] = event[i];
