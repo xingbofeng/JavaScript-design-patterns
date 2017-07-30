@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+<body>
+  <button tag="login" id="button">点击打开登录浮层</button>
+  <script>
+    var showLogin = function() {
+      console.log('打开登录浮层');
+      log(this.getAttribute('tag'));
+    }
+    var log = function(tag) {
+      console.log('上报标签为: ' + tag);
+      // 真正的上报代码略(ajax)
+      // (new Image).src = 'http:// xxx.com/report?tag=' + tag;
+    }
+    document.getElementById('button').onclick = showLogin;
+  </script>
+</body>
+</html>
