@@ -319,5 +319,59 @@ proxyMult(1, 2, 3, 4); // 输出:24
 proxyMult(1, 2, 3, 4); // 输出:24
 ```
 
+## 实际项目
+在最近项目中的应用：
+```javascript
+import { mapState } from 'vuex';
+
+export default {
+    name: 'Image',
+
+    watch: {
+        imageInfo(data) {
+            new this.proxyImage(data.url);
+        },
+    },
+
+
+    data() {
+        const self = this;
+        class proxyImage {
+            constructor(src) {
+                this.img = new Image;
+                const loadingSrc = 'file:///C:/Users/Administrator/Desktop/IMG_0629.JPG';
+                this.setSrc(loadingSrc);
+                this.img.src = src;
+                this.img.onload = () => {
+                    this.setSrc(src);
+                };
+            }
+            setSrc(src) {
+                self.src = src;
+            }
+        }
+        return {
+            proxyImage,
+            src: '',
+        };
+    },
+
+    computed: {
+        ...mapState({
+            imageInfo(state) {
+                return state.imageInfo;
+            },
+        }),
+    },
+
+    methods: {
+        preventDefault() {
+            // 增加用户存储图片的难度，不准他点右键保存图片
+            event.preventDefault();
+            return false;
+        },
+    },
+}
+```
 ## 小结
 在`JavaScript`开发中最常用的是虚拟代理和缓存代理。虽然代理模式非常有用，但我们在编写业务代码的时候，往往不需要去预先猜测是否需要使用代理模式。当真正发现不方便直接访问某个对象的时候，再编写代理也不迟。
