@@ -321,6 +321,7 @@ proxyMult(1, 2, 3, 4); // 输出:24
 
 ## 实际项目
 在最近项目中的应用：
+
 ```javascript
 import { mapState } from 'vuex';
 
